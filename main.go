@@ -7,6 +7,8 @@ import (
 	"os"
 
 	u "todo/internal/utils"
+
+	"github.com/gorilla/mux"
 )
 
 func main() {
@@ -16,14 +18,19 @@ func main() {
 		port = "8000" //localhost
 	}
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Hello, you've requested: %s\n", r.URL.Path)
+	r := mux.NewRouter()
+
+	r.HandleFunc("/todo/{id}", func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		title := vars["id"]
+
+		fmt.Fprintf(w, "You've requested the todo ID: %s\n", title)
 	})
 
 	fmt.Println(port)
 	u.PrintHello()
 
-	err := http.ListenAndServe(":"+port, nil) //Launch the app, visit localhost:8000/api
+	err := http.ListenAndServe(":"+port, r) //Launch the app, visit localhost:8000/api
 	if err != nil {
 		fmt.Print(err)
 	}
