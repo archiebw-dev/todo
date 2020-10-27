@@ -6,10 +6,12 @@ import (
 	"net/http"
 	"os"
 
-	u "todo/internal/utils"
+	"todo/internal/memorydb"
 
 	"github.com/gorilla/mux"
 )
+
+var todoDB *memorydb.TodoDB
 
 func main() {
 
@@ -18,6 +20,21 @@ func main() {
 		port = "8000" //localhost
 	}
 
+	initialiseDB()
+	router := setupRouter()
+
+	err := http.ListenAndServe(":"+port, router) //Launch the app, visit localhost:8000/api
+	if err != nil {
+		fmt.Print(err)
+	}
+}
+
+func initialiseDB() {
+	todoDB = new(memorydb.TodoDB)
+	todoDB.Create()
+}
+
+func setupRouter() *mux.Router {
 	r := mux.NewRouter()
 
 	r.HandleFunc("/todo/{id}", func(w http.ResponseWriter, r *http.Request) {
@@ -26,12 +43,5 @@ func main() {
 
 		fmt.Fprintf(w, "You've requested the todo ID: %s\n", title)
 	})
-
-	fmt.Println(port)
-	u.PrintHello()
-
-	err := http.ListenAndServe(":"+port, r) //Launch the app, visit localhost:8000/api
-	if err != nil {
-		fmt.Print(err)
-	}
+	return r
 }
