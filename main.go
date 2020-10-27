@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 
 	"net/http"
 	"os"
@@ -23,7 +24,7 @@ func main() {
 	initialiseDB()
 	router := setupRouter()
 
-	err := http.ListenAndServe(":"+port, router) //Launch the app, visit localhost:8000/api
+	err := http.ListenAndServe(":"+port, router) //Launch the app, visit localhost:8000
 	if err != nil {
 		fmt.Print(err)
 	}
@@ -31,7 +32,7 @@ func main() {
 
 func initialiseDB() {
 	todoDB = new(memorydb.TodoDB)
-	todoDB.Create()
+	todoDB.Initialise()
 }
 
 func setupRouter() *mux.Router {
@@ -39,9 +40,16 @@ func setupRouter() *mux.Router {
 
 	r.HandleFunc("/todo/{id}", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		title := vars["id"]
-
-		fmt.Fprintf(w, "You've requested the todo ID: %s\n", title)
+		id, err := strconv.Atoi(vars["id"])
+		if err != nil {
+			fmt.Printf("GET: Invalid URL /todo/%s", vars["id"])
+			w.WriteHeader(404)
+			fmt.Fprintf(w, "404 GET: todo ID: %s\n", id)
+		}
+		if todo, ok := todoDB.Read(int(id)); ok == true {
+			json, _ := todo.JSON()
+			w.Write(json)
+		}
 	})
 	return r
 }

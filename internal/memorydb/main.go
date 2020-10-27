@@ -9,8 +9,8 @@ type TodoDB struct {
 	todos map[int]models.Todo
 }
 
-// Create creates an in memory map of Todo's
-func (t *TodoDB) Create() {
+// Initialise creates an in memory map of Todo's
+func (t *TodoDB) Initialise() {
 	if t.todos == nil {
 		t.todos = map[int]models.Todo{
 			1: {ID: 1, Description: "clean the kitchen"},
@@ -24,8 +24,8 @@ func (t *TodoDB) Create() {
 	}
 }
 
-// AddTodo attempts to add a todo into the in memory db
-func (t *TodoDB) AddTodo(todo models.Todo) (err bool) {
+// Create attempts to add a todo into the in memory db
+func (t *TodoDB) Create(todo models.Todo) (err bool) {
 	if _, present := t.todos[todo.ID]; present == true {
 		return true
 	}
@@ -33,13 +33,19 @@ func (t *TodoDB) AddTodo(todo models.Todo) (err bool) {
 	return false
 }
 
-// UpdateTodo adds/updates a todo into the in memory db
-func (t *TodoDB) UpdateTodo(todo models.Todo) {
+// Read returns the Todo from the DB
+func (t *TodoDB) Read(id int) (todo models.Todo, present bool) {
+	todo, present = t.todos[id]
+	return
+}
+
+// Update adds/updates a todo into the in memory db
+func (t *TodoDB) Update(todo models.Todo) {
 	t.todos[todo.ID] = todo
 }
 
-// RemoveTodo removes a Todo from the db
-func (t *TodoDB) RemoveTodo(id int) {
+// Delete removes a Todo from the db
+func (t *TodoDB) Delete(id int) {
 	delete(t.todos, id)
 }
 
