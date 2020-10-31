@@ -3,6 +3,7 @@ package models
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 )
 
 // Todo struct
@@ -14,7 +15,12 @@ type Todo struct {
 // Todos is an array of *Todo
 type Todos []*Todo
 
-func (t Todo) String() string {
+// IDString returns the ID as string
+func (t *Todo) IDString() string {
+	return strconv.Itoa(t.ID)
+}
+
+func (t *Todo) String() string {
 	return fmt.Sprintf(
 		"ID: %d\n"+
 			"Description: %q\n",

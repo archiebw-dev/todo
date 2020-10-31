@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"net/http"
 	"os"
 	"strconv"
@@ -15,12 +14,11 @@ import (
 )
 
 var e *echo.Echo
-var c *context.Context
 var db repositories.Todo
 
 func main() {
 	setupEcho()
-	setupDB()
+	setupFirestore()
 	e.Logger.Info("GAC: " + os.Getenv("GOOGLE_APPLICATION_CREDENTIALS"))
 	e.Logger.Fatal(e.Start(":8000"))
 }
@@ -38,10 +36,11 @@ func setupDB() {
 }
 
 func setupFirestore() {
-	ctx := context.Background()
-	c = &ctx
-	f := firestoredb.CreateClient(ctx, "archiebw-todo")
-	f.Close()
+	var err error
+	db, err = firestoredb.New("archiebw-todo")
+	if err != nil {
+		e.Logger.Fatal("Failed to initialise firestore db...")
+	}
 }
 
 func setupRouting(e *echo.Echo) {
@@ -73,10 +72,10 @@ func getTodo(c echo.Context) error {
 
 func saveTodo(c echo.Context) error {
 	t := new(models.Todo)
-	e.Logger.Infof("POST - /todo %d", t.ID)
 	if err := c.Bind(t); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest)
 	}
+	e.Logger.Infof("POST - /todo %d", t.ID)
 	if err := db.CreateTodo(t); err != nil {
 
 	}
@@ -85,10 +84,10 @@ func saveTodo(c echo.Context) error {
 
 func updateTodo(c echo.Context) error {
 	t := new(models.Todo)
-	e.Logger.Infof("POST - /todo/%d", t.ID)
 	if err := c.Bind(t); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest)
 	}
+	e.Logger.Infof("POST - /todo/%d", t.ID)
 	if err := db.UpdateTodoByID(t); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
