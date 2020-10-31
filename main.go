@@ -35,7 +35,7 @@ func getAllTodo(c echo.Context) error {
 	e.Logger.Info("GET - todo")
 	t, err := todoDB.ReadAll()
 	if err != nil {
-		return c.NoContent(http.StatusInternalServerError)
+		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 	return c.JSON(http.StatusOK, t)
 }
@@ -45,7 +45,7 @@ func getTodo(c echo.Context) error {
 	e.Logger.Infof("GET - todo/%d", id)
 	t, err := todoDB.Read(id)
 	if err != nil {
-		return c.JSON(http.StatusNotFound, t)
+		return echo.NewHTTPError(http.StatusNotFound, err.Error())
 	}
 	return c.JSON(http.StatusOK, t)
 }
@@ -54,7 +54,7 @@ func saveTodo(c echo.Context) error {
 	t := new(models.Todo)
 	e.Logger.Infof("POST - /todo %d", t.ID)
 	if err := c.Bind(t); err != nil {
-		return c.NoContent(http.StatusBadRequest)
+		return echo.NewHTTPError(http.StatusBadRequest)
 	}
 	if err := todoDB.Create(t); err != nil {
 
@@ -66,10 +66,10 @@ func updateTodo(c echo.Context) error {
 	t := new(models.Todo)
 	e.Logger.Infof("POST - /todo/%d", t.ID)
 	if err := c.Bind(t); err != nil {
-		return c.NoContent(http.StatusBadRequest)
+		return echo.NewHTTPError(http.StatusBadRequest)
 	}
 	if err := todoDB.Update(t); err != nil {
-		return c.NoContent(http.StatusInternalServerError)
+		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 	return c.JSON(http.StatusAccepted, t)
 }
@@ -79,7 +79,7 @@ func deleteTodo(c echo.Context) error {
 	e.Logger.Infof("DELETE - todo/%d", id)
 	err := todoDB.Delete(id)
 	if err != nil {
-		return c.NoContent(http.StatusInternalServerError)
+		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 	return c.NoContent(http.StatusNoContent)
 }
