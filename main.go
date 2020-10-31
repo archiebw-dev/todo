@@ -1,26 +1,49 @@
 package main
 
 import (
+	"context"
 	"net/http"
+	"os"
 	"strconv"
+	"todo/internal/firestoredb"
 	"todo/internal/memorydb"
 	"todo/internal/models"
 
-	"github.com/labstack/echo/v4"
+	"cloud.google.com/go/firestore"
+	"github.com/labstack/echo"
 	"github.com/labstack/gommon/log"
 )
 
 var e *echo.Echo
+var c *context.Context
+var f *firestore.Client
 var todoDB *memorydb.Todos
 
 func main() {
+	setupEcho()
+	setupDB()
+	setupFirestore()
+	firestoredb.Add(*c, f)
+	e.Logger.Info("GAC: " + os.Getenv("GOOGLE_APPLICATION_CREDENTIALS"))
+	e.Logger.Fatal(e.Start(":8000"))
+}
+
+func setupEcho() {
 	e = echo.New()
 	e.Logger.SetLevel(log.DEBUG)
 	e.Logger.Info("Setting up routes...")
 	setupRouting(e)
 	e.Logger.Info("Initialising DB...")
+}
+
+func setupDB() {
 	todoDB = memorydb.New()
-	e.Logger.Fatal(e.Start(":8000"))
+}
+
+func setupFirestore() {
+	ctx := context.Background()
+	c = &ctx
+	f = firestoredb.CreateClient(ctx, "archiebw-todo")
 }
 
 func setupRouting(e *echo.Echo) {
