@@ -8,22 +8,19 @@ import (
 	"todo/internal/firestoredb"
 	"todo/internal/memorydb"
 	"todo/internal/models"
+	"todo/internal/repositories"
 
-	"cloud.google.com/go/firestore"
 	"github.com/labstack/echo"
 	"github.com/labstack/gommon/log"
 )
 
 var e *echo.Echo
 var c *context.Context
-var f *firestore.Client
-var todoDB *memorydb.Todos
+var db repositories.Todo
 
 func main() {
 	setupEcho()
 	setupDB()
-	setupFirestore()
-	firestoredb.Add(*c, f)
 	e.Logger.Info("GAC: " + os.Getenv("GOOGLE_APPLICATION_CREDENTIALS"))
 	e.Logger.Fatal(e.Start(":8000"))
 }
@@ -37,13 +34,14 @@ func setupEcho() {
 }
 
 func setupDB() {
-	todoDB = memorydb.New()
+	db = memorydb.New()
 }
 
 func setupFirestore() {
 	ctx := context.Background()
 	c = &ctx
-	f = firestoredb.CreateClient(ctx, "archiebw-todo")
+	f := firestoredb.CreateClient(ctx, "archiebw-todo")
+	f.Close()
 }
 
 func setupRouting(e *echo.Echo) {
@@ -56,7 +54,7 @@ func setupRouting(e *echo.Echo) {
 
 func getAllTodo(c echo.Context) error {
 	e.Logger.Info("GET - todo")
-	t, err := todoDB.ReadAll()
+	t, err := db.GetAllTodos()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
@@ -66,7 +64,7 @@ func getAllTodo(c echo.Context) error {
 func getTodo(c echo.Context) error {
 	id, _ := strconv.Atoi(c.Param("id"))
 	e.Logger.Infof("GET - todo/%d", id)
-	t, err := todoDB.Read(id)
+	t, err := db.GetTodoByID(id)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, err.Error())
 	}
@@ -79,7 +77,7 @@ func saveTodo(c echo.Context) error {
 	if err := c.Bind(t); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest)
 	}
-	if err := todoDB.Create(t); err != nil {
+	if err := db.CreateTodo(t); err != nil {
 
 	}
 	return c.JSON(http.StatusCreated, t)
@@ -91,7 +89,7 @@ func updateTodo(c echo.Context) error {
 	if err := c.Bind(t); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest)
 	}
-	if err := todoDB.Update(t); err != nil {
+	if err := db.UpdateTodoByID(t); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 	return c.JSON(http.StatusAccepted, t)
@@ -100,7 +98,7 @@ func updateTodo(c echo.Context) error {
 func deleteTodo(c echo.Context) error {
 	id, _ := strconv.Atoi(c.Param("id"))
 	e.Logger.Infof("DELETE - todo/%d", id)
-	err := todoDB.Delete(id)
+	err := db.DeleteTodoByID(id)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}

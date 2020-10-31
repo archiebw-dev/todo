@@ -11,6 +11,9 @@ type Todo struct {
 	Description string `json:"description"`
 }
 
+// Todos is an array of *Todo
+type Todos []*Todo
+
 func (t Todo) String() string {
 	return fmt.Sprintf(
 		"ID: %d\n"+

@@ -6,14 +6,14 @@ import (
 	"todo/internal/models"
 )
 
-// Todos is an in memory map of todos
-type Todos struct {
+// TodosRepository is an in memory map of todos
+type TodosRepository struct {
 	todos map[int]models.Todo
 }
 
 // New creates an in memory map of Todo's
-func New() (t *Todos) {
-	t = new(Todos)
+func New() (t *TodosRepository) {
+	t = new(TodosRepository)
 	t.todos = map[int]models.Todo{
 		1: {ID: 1, Description: "clean the kitchen"},
 		2: {ID: 2, Description: "feed Goblin"},
@@ -26,16 +26,8 @@ func New() (t *Todos) {
 	return
 }
 
-// Create attempts to add a todo into the in memory db
-func (t *Todos) Create(todo *models.Todo) error {
-	if _, present := t.todos[todo.ID]; present == true {
-		return errors.New("cannot create item as it already exists")
-	}
-	return nil
-}
-
-// Read returns the Todo from the DB
-func (t *Todos) Read(id int) (*models.Todo, error) {
+// GetTodoByID returns the Todo from the DB
+func (t *TodosRepository) GetTodoByID(id int) (*models.Todo, error) {
 	todo, present := t.todos[id]
 	if !present {
 		return nil, errors.New("item not found")
@@ -43,9 +35,9 @@ func (t *Todos) Read(id int) (*models.Todo, error) {
 	return &todo, nil
 }
 
-// ReadAll returns an array of Todo's from the DB
-func (t *Todos) ReadAll() (*[]models.Todo, error) {
-	var array []models.Todo
+// GetAllTodos returns an array of Todo's from the DB
+func (t *TodosRepository) GetAllTodos() (models.Todos, error) {
+	var array models.Todos
 	m := t.todos
 	keys := make([]int, 0, len(m))
 	for k := range m {
@@ -54,25 +46,34 @@ func (t *Todos) ReadAll() (*[]models.Todo, error) {
 	sort.Ints(keys)
 
 	for _, k := range keys {
-		array = append(array, m[k])
+		val := m[k]
+		array = append(array, &val)
 	}
-	return &array, nil
+	return array, nil
 }
 
-// Update adds/updates a todo into the in memory db
-func (t *Todos) Update(todo *models.Todo) error {
+// CreateTodo attempts to add a todo into the in memory db
+func (t *TodosRepository) CreateTodo(todo *models.Todo) error {
+	if _, present := t.todos[todo.ID]; present == true {
+		return errors.New("cannot create item as it already exists")
+	}
+	return nil
+}
+
+// UpdateTodoByID adds/updates a todo into the in memory db
+func (t *TodosRepository) UpdateTodoByID(todo *models.Todo) error {
 	t.todos[todo.ID] = *todo
 	return nil
 }
 
-// Delete removes a Todo from the db
-func (t *Todos) Delete(id int) error {
+// DeleteTodoByID removes a Todo from the db
+func (t *TodosRepository) DeleteTodoByID(id int) error {
 	delete(t.todos, id)
 	return nil
 }
 
 // String returns a string to pretty print the collection of Todos.
-func (t *Todos) String() string {
+func (t *TodosRepository) String() string {
 	var result string
 	for _, v := range t.todos {
 		result += v.String()
