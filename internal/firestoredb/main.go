@@ -2,8 +2,6 @@ package firestoredb
 
 import (
 	"context"
-	"fmt"
-	"log"
 	"strconv"
 	"todo/internal/models"
 
@@ -39,13 +37,12 @@ func Unmarshal(t *models.Todo) map[string]interface{} {
 
 // GetTodoByID Return a Todo by ID
 func (tr *TodosRepository) GetTodoByID(todoID int) (*models.Todo, error) {
-	dsnap, err := tr.client.Collection(collection).Doc(strconv.Itoa(todoID)).Get(tr.ctx)
+	data, err := tr.client.Collection(collection).Doc(strconv.Itoa(todoID)).Get(tr.ctx)
 	if err != nil {
 		return nil, err
 	}
 	var t models.Todo
-	dsnap.DataTo(&t)
-	fmt.Printf("Document data: %#v\n", t)
+	data.DataTo(&t)
 	return &t, nil
 }
 
@@ -68,27 +65,31 @@ func (tr *TodosRepository) GetAllTodos() (models.Todos, error) {
 	return result, nil
 }
 
-//CreateTodo a
+//CreateTodo creates a todo document
 func (tr *TodosRepository) CreateTodo(todo *models.Todo) error {
 	data := Unmarshal(todo)
 	_, err := tr.client.Collection(collection).Doc(todo.IDString()).Set(tr.ctx, data)
 	if err != nil {
-		log.Printf("Failed to create item: %v", err)
+		return err
 	}
 	return nil
 }
 
-//UpdateTodoByID a
+//UpdateTodoByID updates an existing document or creates it if it doesn't exist
 func (tr *TodosRepository) UpdateTodoByID(todo *models.Todo) error {
 	data := Unmarshal(todo)
 	_, err := tr.client.Collection(collection).Doc(todo.IDString()).Set(tr.ctx, data, firestore.MergeAll)
 	if err != nil {
-		log.Printf("Failed to update item: %v", err)
+		return err
 	}
 	return nil
 }
 
-// DeleteTodoByID -
+// DeleteTodoByID deletes a document by ID
 func (tr *TodosRepository) DeleteTodoByID(todoID int) error {
+	_, err := tr.client.Collection(collection).Doc(strconv.Itoa(todoID)).Delete(tr.ctx)
+	if err != nil {
+		return err
+	}
 	return nil
 }
