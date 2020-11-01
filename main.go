@@ -9,7 +9,8 @@ import (
 	"todo/internal/models"
 	"todo/internal/repositories"
 
-	"github.com/labstack/echo"
+	"github.com/labstack/echo-contrib/prometheus"
+	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/log"
 )
 
@@ -25,10 +26,11 @@ func main() {
 
 func setupEcho() {
 	e = echo.New()
+	p := prometheus.NewPrometheus("echo", nil)
+	p.Use(e)
 	e.Logger.SetLevel(log.DEBUG)
 	e.Logger.Info("Setting up routes...")
 	setupRouting(e)
-	e.Logger.Info("Initialising DB...")
 }
 
 func setupDB() {
@@ -36,6 +38,7 @@ func setupDB() {
 }
 
 func setupFirestore() {
+	e.Logger.Info("Initialising DB...")
 	var err error
 	db, err = firestoredb.New("archiebw-todo")
 	if err != nil {
