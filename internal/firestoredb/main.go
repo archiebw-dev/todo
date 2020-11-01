@@ -2,7 +2,6 @@ package firestoredb
 
 import (
 	"context"
-	"strconv"
 	"todo/internal/models"
 
 	"cloud.google.com/go/firestore"
@@ -36,8 +35,8 @@ func Unmarshal(t *models.Todo) map[string]interface{} {
 }
 
 // GetTodoByID Return a Todo by ID
-func (tr *TodosRepository) GetTodoByID(todoID int) (*models.Todo, error) {
-	data, err := tr.client.Collection(collection).Doc(strconv.Itoa(todoID)).Get(tr.ctx)
+func (tr *TodosRepository) GetTodoByID(todoID string) (*models.Todo, error) {
+	data, err := tr.client.Collection(collection).Doc(todoID).Get(tr.ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -86,8 +85,8 @@ func (tr *TodosRepository) UpdateTodoByID(todo *models.Todo) error {
 }
 
 // DeleteTodoByID deletes a document by ID
-func (tr *TodosRepository) DeleteTodoByID(todoID int) error {
-	_, err := tr.client.Collection(collection).Doc(strconv.Itoa(todoID)).Delete(tr.ctx)
+func (tr *TodosRepository) DeleteTodoByID(todoID string) error {
+	_, err := tr.client.Collection(collection).Doc(todoID).Delete(tr.ctx)
 	if err != nil {
 		return err
 	}

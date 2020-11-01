@@ -3,7 +3,6 @@ package main
 import (
 	"net/http"
 	"os"
-	"strconv"
 	"todo/internal/firestoredb"
 	"todo/internal/memorydb"
 	"todo/internal/models"
@@ -64,7 +63,7 @@ func getAllTodo(c echo.Context) error {
 }
 
 func getTodo(c echo.Context) error {
-	id, _ := strconv.Atoi(c.Param("id"))
+	id := c.Param("id")
 	e.Logger.Infof("GET - todo/%d", id)
 	t, err := db.GetTodoByID(id)
 	if err != nil {
@@ -98,7 +97,7 @@ func updateTodo(c echo.Context) error {
 }
 
 func deleteTodo(c echo.Context) error {
-	id, _ := strconv.Atoi(c.Param("id"))
+	id := c.Param("id")
 	e.Logger.Infof("DELETE - todo/%d", id)
 	err := db.DeleteTodoByID(id)
 	if err != nil {
