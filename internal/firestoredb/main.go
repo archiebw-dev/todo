@@ -68,7 +68,7 @@ func (tr *TodosRepository) GetAllTodos() (models.Todos, error) {
 //CreateTodo creates a todo document
 func (tr *TodosRepository) CreateTodo(todo *models.Todo) error {
 	data := Unmarshal(todo)
-	_, err := tr.client.Collection(collection).Doc(todo.IDString()).Set(tr.ctx, data)
+	_, err := tr.client.Collection(collection).Doc(todo.ID).Set(tr.ctx, data)
 	if err != nil {
 		return err
 	}
@@ -78,7 +78,7 @@ func (tr *TodosRepository) CreateTodo(todo *models.Todo) error {
 //UpdateTodoByID updates an existing document or creates it if it doesn't exist
 func (tr *TodosRepository) UpdateTodoByID(todo *models.Todo) error {
 	data := Unmarshal(todo)
-	_, err := tr.client.Collection(collection).Doc(todo.IDString()).Set(tr.ctx, data, firestore.MergeAll)
+	_, err := tr.client.Collection(collection).Doc(todo.ID).Set(tr.ctx, data, firestore.MergeAll)
 	if err != nil {
 		return err
 	}
