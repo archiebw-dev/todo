@@ -10,6 +10,7 @@ import (
 
 	"github.com/labstack/echo-contrib/prometheus"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
 )
 
@@ -30,6 +31,10 @@ func setupEcho() {
 	e.Logger.SetLevel(log.DEBUG)
 	e.Logger.Info("Setting up routes...")
 	setupRouting(e)
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"*"},
+		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+	}))
 }
 
 func setupDB() {
@@ -79,7 +84,7 @@ func saveTodo(c echo.Context) error {
 	}
 	e.Logger.Infof("POST - /todo %d", t.ID)
 	if err := db.CreateTodo(t); err != nil {
-
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusCreated, t)
 }
