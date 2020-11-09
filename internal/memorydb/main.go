@@ -57,13 +57,14 @@ func (t *TodosRepository) GetAllTodos() (models.Todos, error) {
 // CreateTodo attempts to add a todo into the in memory db
 func (t *TodosRepository) CreateTodo(todo *models.Todo) error {
 	if _, present := t.todos[todo.ID]; present == true {
-		return errors.New("cannot create item as it already exists")
+		return errors.New("cannot create item, duplicate ID")
 	}
+	t.todos[todo.ID] = *todo
 	return nil
 }
 
-// UpdateTodoByID adds/updates a todo into the in memory db
-func (t *TodosRepository) UpdateTodoByID(todo *models.Todo) error {
+// UpdateTodo adds/updates a todo into the in memory db
+func (t *TodosRepository) UpdateTodo(todo *models.Todo) error {
 	t.todos[todo.ID] = *todo
 	return nil
 }

@@ -7,6 +7,6 @@ type Todo interface {
 	GetTodoByID(todoID string) (*models.Todo, error)
 	GetAllTodos() (models.Todos, error)
 	CreateTodo(todo *models.Todo) error
-	UpdateTodoByID(todo *models.Todo) error
+	UpdateTodo(todo *models.Todo) error
 	DeleteTodoByID(todoID string) error
 }

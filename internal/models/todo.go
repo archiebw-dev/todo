@@ -18,7 +18,7 @@ type Todos []*Todo
 // String return formatted string representation
 func (t *Todo) String() string {
 	return fmt.Sprintf(
-		"ID: %d\n"+
+		"ID: %s\n"+
 			"Description: %q\n",
 		t.ID, t.Description)
 }

@@ -95,7 +95,7 @@ func updateTodo(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest)
 	}
 	e.Logger.Infof("POST - /todo/%d", t.ID)
-	if err := db.UpdateTodoByID(t); err != nil {
+	if err := db.UpdateTodo(t); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 	return c.JSON(http.StatusAccepted, t)

@@ -74,8 +74,8 @@ func (tr *TodosRepository) CreateTodo(todo *models.Todo) error {
 	return nil
 }
 
-//UpdateTodoByID updates an existing document or creates it if it doesn't exist
-func (tr *TodosRepository) UpdateTodoByID(todo *models.Todo) error {
+//UpdateTodo updates an existing document or creates it if it doesn't exist
+func (tr *TodosRepository) UpdateTodo(todo *models.Todo) error {
 	data := Unmarshal(todo)
 	_, err := tr.client.Collection(collection).Doc(todo.ID).Set(tr.ctx, data, firestore.MergeAll)
 	if err != nil {
